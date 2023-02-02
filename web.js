@@ -2,43 +2,38 @@ let connected;
 let ws;
 
 function sendJSON() {
-  let pelicula = document.querySelector(".pelicula");
+  AbortSignal.timeout ??= function timeout(ms) {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.close(), ms);
+    return ctrl.signal;
+  };
   let titulo = document.querySelector("#titulo");
   console.log(titulo.value);
-  if(connected){
-    ws.send(titulo.value);
+  let url = "http://localhost:35000/";
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    mode: "no-cors",
+    signal: AbortSignal.timeout(0),
+    body: "titulo:"+titulo.value,
+  });
+  function makeHttpObject() {
+    if ("XMLHttpRequest" in window) return new XMLHttpRequest();
+    else if ("ActiveXObject" in window)
+      return new ActiveXObject("Msxml2.XMLHTTP");
   }
-  ws.close();
+  
+  var request = makeHttpObject();
+  request.withCredentials = false;
+  request.open("GET", "http://localhost:35000/", true);
+  request.send(null);
+  request.onreadystatechange = function () {
+    if (request.readyState == 4) {
+      document.getElementById("pelicula").innerHTML = request.responseText;
+      document.getElementById("pelicula").style.visibility = "visible";
+      console.log(request.responseText);
+    }
+  };
 }
-
-function connectWS(){
-    let url = "ws://localhost:35000/";
-    ws = new WebSocket(url);
-    ws.binaryType = "arraybuffer";
-    ws.onopen = function () {
-      console.log("open");
-      sessionStorage.echoServer = url;
-    };
-    ws.onclose = function () {
-      console.log("close");
-    };
-    ws.onerror = function () {
-      console.log("error");
-    };
-    ws.onmessage = function (e) {
-      if (e.data instanceof Blob) {
-        let reader = new FileReader();
-        reader.onload = function (e) {
-          console.log(
-            "received blob: " + encodeHexString(new Uint8Array(e.target.result))
-          );
-        };
-        reader.readAsArrayBuffer(e.data);
-      } else if (e.data instanceof ArrayBuffer) {
-        console.log("received array buffer: " + encodeHexString(new Uint8Array(e.data)));
-      } else {
-        console.log("received: " + e.data);
-      }
-    };
-}
-
