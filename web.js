@@ -2,6 +2,9 @@ let connected;
 let ws;
 let flag = false;
 
+/**
+ * Funcion que nos permite realizar una consulta a un ws, enviar un titulo y recibir la información de una pélicula.
+ */
 function sendJSON() {
   AbortSignal.timeout ??= function timeout(ms) {
     const ctrl = new AbortController();
