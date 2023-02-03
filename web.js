@@ -1,5 +1,6 @@
 let connected;
 let ws;
+let flag = false;
 
 function sendJSON() {
   AbortSignal.timeout ??= function timeout(ms) {
@@ -7,8 +8,8 @@ function sendJSON() {
     setTimeout(() => ctrl.close(), ms);
     return ctrl.signal;
   };
-  let titulo = document.querySelector("#titulo");
-  console.log(titulo.value);
+  let titulo = document.querySelector("#titulo").value;
+  console.log(titulo);
   let url = "http://localhost:35000/";
   fetch(url, {
     method: "POST",
@@ -17,14 +18,13 @@ function sendJSON() {
     },
     mode: "no-cors",
     signal: AbortSignal.timeout(0),
-    body: "titulo:"+titulo.value,
+    body: "titulo:" + titulo,
   });
   function makeHttpObject() {
     if ("XMLHttpRequest" in window) return new XMLHttpRequest();
     else if ("ActiveXObject" in window)
       return new ActiveXObject("Msxml2.XMLHTTP");
   }
-  
   var request = makeHttpObject();
   request.withCredentials = false;
   request.open("GET", "http://localhost:35000/", true);
@@ -36,4 +36,5 @@ function sendJSON() {
       console.log(request.responseText);
     }
   };
+  flag = true;
 }
